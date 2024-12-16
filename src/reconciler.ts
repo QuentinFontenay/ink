@@ -26,19 +26,16 @@ if (process.env['DEV'] === 'true') {
 	try {
 		await import('./devtools.js');
 	} catch (error: any) {
-		if (error.code === 'ERR_MODULE_NOT_FOUND') {
+		if (error.code === 'MODULE_NOT_FOUND') {
 			console.warn(
 				`
-The environment variable DEV is set to true, so Ink tried to import \`react-devtools-core\`,
-but this failed as it was not installed. Debugging with React Devtools requires it.
-
-To install use this command:
+Debugging with React Devtools requires \`react-devtools-core\` dependency to be installed.
 
 $ npm install --save-dev react-devtools-core
 				`.trim() + '\n',
 			);
 		} else {
-			// eslint-disable-next-line @typescript-eslint/only-throw-error
+			// eslint-disable-next-line @typescript-eslint/no-throw-literal
 			throw error;
 		}
 	}
@@ -59,7 +56,7 @@ const diff = (before: AnyObject, after: AnyObject): AnyObject | undefined => {
 	let isChanged = false;
 
 	for (const key of Object.keys(before)) {
-		const isDeleted = after ? !Object.hasOwn(after, key) : true;
+		const isDeleted = after ? !Object.hasOwnProperty.call(after, key) : true;
 
 		if (isDeleted) {
 			changed[key] = undefined;
@@ -94,6 +91,8 @@ type UpdatePayload = {
 	props: Props | undefined;
 	style: Styles | undefined;
 };
+
+let currentUpdatePriority: number = DefaultEventPriority;
 
 export default createReconciler<
 	ElementNames,
@@ -234,7 +233,12 @@ export default createReconciler<
 	scheduleTimeout: setTimeout,
 	cancelTimeout: clearTimeout,
 	noTimeout: -1,
-	getCurrentEventPriority: () => DefaultEventPriority,
+	// @ts-expect-error
+	setCurrentUpdatePriority: newPriority => {
+		currentUpdatePriority = newPriority;
+	},
+	getCurrentUpdatePriority: () => currentUpdatePriority,
+	resolveUpdatePriority: () => currentUpdatePriority || DefaultEventPriority,
 	beforeActiveInstanceBlur() {},
 	afterActiveInstanceBlur() {},
 	detachDeletedInstance() {},
@@ -265,7 +269,8 @@ export default createReconciler<
 
 		return {props, style};
 	},
-	commitUpdate(node, {props, style}) {
+	commitUpdate(node, newProps) {
+		const {props, style} = newProps;
 		if (props) {
 			for (const [key, value] of Object.entries(props)) {
 				if (key === 'style') {
@@ -297,5 +302,21 @@ export default createReconciler<
 	removeChild(node, removeNode) {
 		removeChildNode(node, removeNode);
 		cleanupYogaNode(removeNode.yogaNode);
+	},
+	maySuspendCommit() {
+		// TODO: May return false here if we are confident that we don't need to suspend
+		return true;
+	},
+	startSuspendingCommit() {},
+	waitForCommitToBeReady() {
+		return null;
+	},
+	preloadInstance() {
+		// Return true to indicate it's already loaded
+		return true;
+	},
+	suspendInstance() {},
+	shouldAttemptEagerTransition() {
+		return false;
 	},
 });
