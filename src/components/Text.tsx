@@ -1,4 +1,4 @@
-import React, {type ReactNode} from 'react';
+import {type ReactNode} from 'react';
 import chalk, {type ForegroundColorName} from 'chalk';
 import {type LiteralUnion} from 'type-fest';
 import colorize from '../colorize.js';
