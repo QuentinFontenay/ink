@@ -1,11 +1,11 @@
-import {type ReactNode, type Key, type LegacyRef, Ref} from 'react';
+import {type ReactNode, type Key, Ref} from 'react';
 import {type Except} from 'type-fest';
 import {type DOMElement} from './dom.js';
 import {type Styles} from './styles.js';
+import type {JSX as Jsx} from 'react/jsx-runtime';
 
-declare global {
+declare module "react" {
 	namespace JSX {
-		// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 		interface IntrinsicElements {
 			'ink-box': Ink.Box;
 			'ink-text': Ink.Text;
