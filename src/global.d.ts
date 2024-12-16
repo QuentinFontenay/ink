@@ -2,7 +2,6 @@ import {type ReactNode, type Key, Ref} from 'react';
 import {type Except} from 'type-fest';
 import {type DOMElement} from './dom.js';
 import {type Styles} from './styles.js';
-import type {JSX as Jsx} from 'react/jsx-runtime';
 
 declare module "react" {
 	namespace JSX {
