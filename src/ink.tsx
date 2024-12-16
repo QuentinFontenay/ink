@@ -1,6 +1,9 @@
 import process from 'node:process';
 import React, {type ReactNode} from 'react';
-import {throttle} from 'es-toolkit/compat';
+// @ts-expect-error
+import throttle from 'lodash/throttle.js';
+// @ts-expect-error
+import {type DebouncedFunc} from 'lodash';
 import ansiEscapes from 'ansi-escapes';
 import isInCi from 'is-in-ci';
 import autoBind from 'auto-bind';
@@ -30,7 +33,7 @@ export type Options = {
 export default class Ink {
 	private readonly options: Options;
 	private readonly log: LogUpdate;
-	private readonly throttledLog: LogUpdate;
+	private readonly throttledLog: LogUpdate | DebouncedFunc<LogUpdate>;
 	// Ignore last render after unmounting a tree to prevent empty output before exit
 	private isUnmounted: boolean;
 	private lastOutput: string;
@@ -61,10 +64,10 @@ export default class Ink {
 		this.log = logUpdate.create(options.stdout);
 		this.throttledLog = options.debug
 			? this.log
-			: (throttle(this.log, undefined, {
+			: throttle(this.log, undefined, {
 					leading: true,
 					trailing: true,
-				}) as unknown as LogUpdate);
+				});
 
 		// Ignore last render after unmounting a tree to prevent empty output before exit
 		this.isUnmounted = false;
@@ -76,17 +79,25 @@ export default class Ink {
 		// so that it's rerendered every time, not just new static parts, like in non-debug mode
 		this.fullStaticOutput = '';
 
+		const rootTag = 1;
+		const hydrationCallbacks = null;
+		const isStrictMode = false;
+		const concurrentUpdatesByDefaultOverride = false;
+		const identifierPrefix = 'id';
+		// TODO: Change error handling to noop. I've added this to more easily develop the reconciler
+		const onRecoverableError = console.error;
+		const transitionCallbacks = null;
+
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		this.container = reconciler.createContainer(
 			this.rootNode,
-			// Legacy mode
-			0,
-			null,
-			false,
-			null,
-			'id',
-			() => {},
-			null,
+			rootTag,
+			hydrationCallbacks,
+			isStrictMode,
+			concurrentUpdatesByDefaultOverride,
+			identifierPrefix,
+			onRecoverableError,
+			transitionCallbacks,
 		);
 
 		// Unmount when process exits
@@ -290,10 +301,12 @@ export default class Ink {
 	}
 
 	async waitUntilExit(): Promise<void> {
-		this.exitPromise ||= new Promise((resolve, reject) => {
-			this.resolveExitPromise = resolve;
-			this.rejectExitPromise = reject;
-		});
+		if (!this.exitPromise) {
+			this.exitPromise = new Promise((resolve, reject) => {
+				this.resolveExitPromise = resolve;
+				this.rejectExitPromise = reject;
+			});
+		}
 
 		return this.exitPromise;
 	}
