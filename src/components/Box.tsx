@@ -2,6 +2,7 @@ import {forwardRef, type PropsWithChildren} from 'react';
 import {type Except} from 'type-fest';
 import {type Styles} from '../styles.js';
 import {type DOMElement} from '../dom.js';
+import React from 'react';
 
 export type Props = Except<Styles, 'textWrap'>;
 

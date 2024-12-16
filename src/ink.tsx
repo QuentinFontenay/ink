@@ -1,5 +1,5 @@
 import process from 'node:process';
-import {type ReactNode} from 'react';
+import React, {type ReactNode} from 'react';
 import {throttle} from 'es-toolkit/compat';
 import ansiEscapes from 'ansi-escapes';
 import isInCi from 'is-in-ci';
@@ -82,7 +82,9 @@ export default class Ink {
 		const concurrentUpdatesByDefaultOverride = false;
 		const identifierPrefix = 'id';
 		// TODO: Change error handling to noop. I've added this to more easily develop the reconciler
-		const onRecoverableError = console.error;
+		const onRecoverableError: (error: Error) => void = error => {
+			throw error;
+		};
 		const transitionCallbacks = null;
 
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

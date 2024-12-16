@@ -1,3 +1,4 @@
+import React from 'react';
 import {EventEmitter} from 'node:events';
 import process from 'node:process';
 import {PureComponent, type ReactNode} from 'react';

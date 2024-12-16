@@ -1,3 +1,5 @@
+import React from 'react';
+
 export type Props = {
 	/**
 	 * Number of newlines to insert.

@@ -68,8 +68,12 @@
 		"ws": "^8.18.0",
 		"yoga-wasm-web": "~0.3.3"
 	},
-	"resolutions": {
-		"react": "19.0.0"
+	"overrides": {
+		"eslint-plugin-react": {
+			"prop-types": {
+				"react-is": "19.0.0"
+			}
+		}
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^9.2.0",
