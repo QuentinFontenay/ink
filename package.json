@@ -108,7 +108,7 @@
 		"xo": "^0.59.3"
 	},
 	"peerDependencies": {
-		"@types/react": "19.0.1",
+		"@types/react": "19.0.9",
 		"react": "19.0.0",
 		"react-devtools-core": "^4.19.1"
 	},
